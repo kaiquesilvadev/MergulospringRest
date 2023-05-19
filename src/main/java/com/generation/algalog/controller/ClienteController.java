@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.generation.algalog.model.Cliente;
 import com.generation.algalog.repository.ClienteRepository;
-
+import com.generation.algalog.service.CatalogoClienteService;
 
 import jakarta.validation.Valid;
 
@@ -31,6 +31,9 @@ public class ClienteController {
 
 	@Autowired
 	private ClienteRepository  clienteRepository;
+	
+	@Autowired
+	private CatalogoClienteService catalogoClienteService;
 	
 	@GetMapping
 	public ResponseEntity<List<Cliente>>  getAll(){
@@ -44,13 +47,15 @@ public class ClienteController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	@PostMapping
-	public ResponseEntity<Cliente> post(@Valid @RequestBody Cliente cliente) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(clienteRepository.save(cliente));
+	@ResponseStatus(HttpStatus.CREATED)
+	public Cliente  post(@Valid @RequestBody Cliente cliente) {
+		return catalogoClienteService.salvar(cliente);
 	}
+	
 	@PutMapping
 	public ResponseEntity<Cliente> put(@Valid @RequestBody Cliente cliente) {
 		return clienteRepository.findById(cliente.getId())
-				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(clienteRepository.save(cliente)))
+				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(catalogoClienteService.salvar(cliente)))
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 	}
 	
@@ -62,7 +67,6 @@ public class ClienteController {
 		if (postagem.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-		clienteRepository.deleteById(id);
-
+		catalogoClienteService.excluir(id);
 	}
 }
